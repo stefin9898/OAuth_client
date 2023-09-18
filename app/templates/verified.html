@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}OAuth Client{% endblock %}
+{% block content %}
+<div class="content">
+    {% if is_authenticated %}
+    <div class="alert alert-success" role="alert">
+        Authenticated
+        <a href="{% url 'invoke' %}?user_id={{ user_id }}" class="btn btn-info">Invoke API</a>
+    </div>
+    {% else %}
+    <div class="alert alert-danger" role="alert">
+        Not Authenticated
+    </div>
+    {% endif%}
+</div>
+{% endblock %}

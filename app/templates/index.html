@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}OAuth Client{% endblock %}
+{% block content %}
+<div class="content">
+    <span class="navbar-brand mb-0 h2">User ID: {{ user_id }}</span>
+    <br/>
+    <a href="{{ oauth_url }}" class="btn btn-primary" role="button">Connect with Accuknox</a>
+</div>
+{% endblock %}

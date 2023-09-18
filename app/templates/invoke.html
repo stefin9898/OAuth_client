@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}API Invocation{% endblock %}
+{% block content %}
+<div class="content">
+    {% if tenants %}
+    <h3>Tenants</h3>
+    {% for tenant in tenants %}
+    {{tenant.name}} -> {{ tenant.id }}
+    <br>
+    {% endfor %}
+    <br>
+    <h3>CSPM Sources</h3>
+    {% for source in sources %}
+        -> {{ source }}
+    <br />
+    {% endfor %}
+    <h2>Total Vulnerablities: {{ vuln }}</h2>
+    {% else %}
+    <div class="alert alert-danger" role="alert">
+        Not Authenticated
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
