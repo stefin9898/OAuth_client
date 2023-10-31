@@ -5,8 +5,8 @@ from OAuth_client import settings
 
 from .models import OAuthUser
 
-ACCUKNOX_URL = "https://cspm.dev.accuknox.com/api/v1/o/authorize/?"
-TOKEN_URL = "https://cspm.dev.accuknox.com/api/v1/o/token/"
+ACCUKNOX_URL = "https://cspm." + settings.ENV + ".accuknox.com/api/v1/o/authorize/?"
+TOKEN_URL = "https://cspm." + settings.ENV + ".accuknox.com/api/v1/o/token/"
 
 
 def home(request):
@@ -68,7 +68,8 @@ def verify(request):
         oauth_user.jwt_token = json.loads(response.text)["access_token"]
         oauth_user.save()
 
-    except Exception:
+    except Exception as e:
+        print(e)
         pass
     context = {"is_authenticated": is_authenticated}
     if is_authenticated:
@@ -86,16 +87,28 @@ def invoke(request):
         }
         # response = requests.get("https://cspm.dev.accuknox.com/api/v1/users/current-user-data", headers=headers)
         response = requests.get(
-            "https://cspm.dev.accuknox.com/api/v1/clients", headers=headers
-        )
-        sources = requests.get(
-            "https://cspm.dev.accuknox.com/api/v1/sources/", headers=headers
-        )
-        vuln = requests.get(
-            "https://cspm.dev.accuknox.com/api/v1/dashboard?data_type=SEVERITY_ISSUES&date_from=2023-09-10T11:04:41.204&date_to=2023-09-12T11:04:41.204&limit=10",
+            "https://cspm." + settings.ENV + ".accuknox.com/api/v1/clients",
             headers=headers,
         )
-        if response.status_code == 200:
+        sources = requests.get(
+            "https://cspm." + settings.ENV + ".accuknox.com/api/v1/sources/",
+            headers=headers,
+        )
+        vuln = requests.get(
+            "https://cspm."
+            + settings.ENV
+            + ".accuknox.com/api/v1/dashboard?data_type=SEVERITY_ISSUES&date_from=2023-09-10T11:04:41.204&date_to=2023-09-12T11:04:41.204&limit=10",
+            headers=headers,
+        )
+        headers["Content-Type"] = "application/json"
+        payload = {"cluster_id": [], "namespace_id": [], "type": []}
+        workloads = requests.post(
+            "https://cwpp." + settings.ENV + ".accuknox.com/cm/v2/get-workloads",
+            headers=headers,
+            data=json.dumps(payload),
+        )
+        print("CWPP API returned", workloads.status_code)
+        if workloads.status_code == 200:
             context["tenants"] = json.loads(response.text)
             context["sources"] = json.loads(sources.text)["sources"]
             context["vuln"] = json.loads(vuln.content)["result"]["severity_issues"][
@@ -120,6 +133,7 @@ def invoke(request):
                 oauth_user.refresh_token = json.loads(response.text)["refresh_token"]
                 oauth_user.jwt_token = json.loads(response.text)["access_token"]
                 oauth_user.save()
-    except:
+    except Exception as e:
+        print(e)
         pass
     return render(request, "invoke.html", context)
